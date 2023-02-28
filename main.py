@@ -5,34 +5,63 @@ def knapsack(C, weight, cost, n):
             if i == 0 or j == 0:
                 K[i][j] = 0
             elif weight[i - 1] <= j:
-                K[i][j] = max(cost[i - 1] + K[i - 1][j - weight[i - 1]], K[i - 1][j])
+                K[i][j] = max(cost[i - 1][0] + K[i - 1][j - weight[i - 1]], K[i - 1][j])
             else:
                 K[i][j] = K[i - 1][j]
     return K
 
+backpack = {}
 
-items = ['rifle', 'pistol', 'ammo', 'medkit', 'inhaler', 'knife',
-        'axe', 'talisman', 'flask', 'food', 'crossbow']
-values = [25, 15, 15, 20, 5, 15, 20, 25, 15, 20, 20]
-weights = [3, 2, 2, 2, 1, 1, 3, 1, 1, 2, 2]
+stuffdict = {'в': (3, 25),
+             'п': (2, 15),
+             'б': (2, 15),
+             'а': (2, 20),
+             'н': (1, 15),
+             'т': (3, 20),
+             'о': (1, 25),
+             'ф': (1, 15),
+             'д': (1, 10),
+             'к': (2, 20),
+             'р': (2, 20)
+             }
+values = []
+weights = []
 capacity = 8
-all_points = sum(values)
-init_points = 25
+init_points = 10
+
+for key in stuffdict:
+    weights.append([stuffdict[key][1], key])
+    values.append(stuffdict[key][0])
+
 count = len(values)
 
-K = knapsack(capacity, weights, values, count)
+K = knapsack(capacity, values, weights, count)
 
-i, j, total = count, capacity, 0
-res = K[count][capacity]
-while i > 0 and res > 0:
-    if res != K[i - 1][j]:
-        print(items[i - 1], "value", values[i - 1], "points,", weights[i - 1], "cells")
-        total += weights[i - 1]
-        res -= values[i - 1]
-        j -= weights[i - 1]
+j, i, total = capacity, count, 0
+result = K[count][capacity]
+while i > 0 and result > 0:
+    if result != K[i - 1][j]:
+        backpack[weights[i - 1][1]] = [weights[i - 1][0], values[i - 1]]
+        stuffdict.pop(weights[i-1][1])
+        total += values[i - 1]
+        result -= weights[i - 1][0]
+        j -= values[i - 1]
     i -= 1
-print("\nTotal weight:", total, "\b, knapsack value:", K[count][capacity])
-points = K[count][capacity] + init_points - (all_points - K[count][capacity])
-print("Overall value", all_points)
-print("Total value", points)
+
+L = 0
+for key in backpack:
+    for k in range(backpack[key][1]):
+        if L == 3:
+            print("\b\b")
+            L = 0
+        print(key, end=', ')
+        L += 1
+print("и")
+
+start = 10
+sum = 0
+print(stuffdict)
+for key in stuffdict:
+    sum += stuffdict[key][1]
+print("Итоговые очки выживания: ", K[count][capacity] + 5 - sum + start)
 
